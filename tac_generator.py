@@ -108,7 +108,7 @@ def p_dcl_declare_int(p):
     'statement : INTDCL NAME ";"'
     symbolsTable["table"][p[2]] = { "type": "INT", "value":0}
     n = Node()
-    n.type = "INT_DLC"
+    n.type = "INT_DCL"
     n.val = p[2]
     p[0] = n
 
@@ -116,7 +116,7 @@ def p_statement_declare_float(p):
     'statement : FLOATDCL NAME ";"'
     symbolsTable["table"][p[2]] = { "type": "FLOAT", "value":0 }
     n = Node()
-    n.type = "FLOAT_DLC"
+    n.type = "FLOAT_DCL"
     n.val = p[2]
     p[0] = n
 
@@ -124,7 +124,7 @@ def p_statement_declare_bool(p):
     'statement : BOOLDCL NAME ";"'
     symbolsTable["table"][p[2]] = { "type": "BOOLEAN", "value": False }
     n = Node()
-    n.type = "BOOL_DLC"
+    n.type = "BOOL_DCL"
     n.val = p[2]
     p[0] = n
 
