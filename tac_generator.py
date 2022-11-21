@@ -9,12 +9,13 @@ reserved = {
     "true": "BOOLVAL",
     "false": "BOOLVAL",
     "if": "IF",
-    "else": "ELSE"
+    "and": "AND",
+    "or": "OR"
 }
 
 
 tokens = [
-    'NAME', 'INUMBER', 'FNUMBER',
+    'NAME', 'INUMBER', 'FNUMBER', 'EQUALS', 'NOTEQUALS', 'LESS', 'GREATER', 'LESSEQUALS', 'GREATEREQUALS'
 ]
 tokens.extend(reserved.values())
 
@@ -41,6 +42,12 @@ def t_INUMBER(t):
     t.value = int(t.value)
     return t
 
+t_EQUALS = r'=='
+t_NOTEQUALS = r'!='
+t_LESS = r'<'
+t_GREATER = r'>'
+t_LESSEQUALS = r'<='
+t_GREATEREQUALS = r'>='
 
 t_ignore = " \t"
 
@@ -151,7 +158,6 @@ def p_statement_assign(p):
         print ( "You must declare a variable before using it")
     n = Node()
     n.type = 'ASIGN'
-    ##n.childrens.append(p[1])
     if p[1] in symbolsTable["table"]:
         n1 = Node()
         n1.type = 'ID'
@@ -169,11 +175,11 @@ def p_expression_group(p):
     p[0] = p[2]
 
 def p_expression_binop(p):
-    '''expression : expression '+' expression
-                  | expression '-' expression
-                  | expression '*' expression
-                  | expression '/' expression
-                  | expression '^' expression'''
+    '''numexp : numexp '+' numexp
+              | numexp '-' numexp
+              | numexp '*' numexp
+              | numexp '/' numexp
+              | numexp '^' numexp'''
     if p[2] in ('+', '-', '*', '/', '^'):
         n = Node()
         n.type = p[2]
@@ -181,10 +187,12 @@ def p_expression_binop(p):
         n.childrens.append(p[3])
         p[0] = n
     
-
+def p_expression_number(p):
+    '''expression : numexp'''
+    p[0] = p[1]
 
 def p_expression_inumber(p):
-    "expression : INUMBER"
+    "numexp : INUMBER"
     n = Node()
     n.type = 'INUMBER'
     n.val = int(p[1])
@@ -193,7 +201,7 @@ def p_expression_inumber(p):
 
 
 def p_expression_fnumber(p):
-    "expression : FNUMBER"
+    "numexp : FNUMBER"
     n = Node()
     n.type = 'FNUMBER'
     n.val = float(p[1])
@@ -205,12 +213,41 @@ def p_expression_boolval(p):
     p[0] = p[1]
 
 def p_bool_expression(p):
-    "boolexp : BOOLVAL"
-    n = Node()
-    n.type = 'BOOLVAL'
-    n.val = (p[1] == 'true')
-    p[0] = n
+    '''boolexp : '(' boolexp ')'
+               | boolexp AND boolexp
+               | boolexp OR boolexp
+               | compexp
+               | BOOLVAL
+               | NAME '''
+    if len(p) == 2:
+        n = Node()
+        n.type = 'BOOLVAL'
+        n.val = (p[1] == 'true')
+        p[0] = n
+    else:
+        if p[2] in ('and', 'or'):
+            n = Node()
+            n.type = p[2].upper()
+            n.childrens.append(p[1])
+            n.childrens.append(p[3])
+            p[0] = n
+        else:
+            p[0] = p[2]
 
+def p_comparison_expression(p):
+    '''compexp : boolexp EQUALS boolexp
+               | boolexp NOTEQUALS boolexp
+               | numexp EQUALS numexp
+               | numexp NOTEQUALS numexp
+               | numexp GREATER numexp
+               | numexp LESS numexp
+               | numexp LESSEQUALS numexp
+               | numexp GREATEREQUALS numexp'''
+    n = Node()
+    n.type = p[2]
+    n.childrens.append(p[1])
+    n.childrens.append(p[3])
+    p[0] = n
 
 def p_expression_name(p):
     "expression : NAME"
@@ -238,38 +275,39 @@ yacc.parse(content)
 
 
 abstractTree.print()
-varCounter = 0
-labelCounter = 0
-def genTAC(node):
-    global varCounter
-    global labelCounter
-    if ( node.type == "ASIGN" ):
-        print(node.childrens[0].val  + " := " + genTAC(node.childrens[1]) )
-    elif ( node.type == "INUMBER"):
-        return str(node.val)
-    elif ( node.type in ["+", "-", "*", "/", "^"] ):
-        tempVar = "t" + str(varCounter)
-        varCounter = varCounter +1
-        print( tempVar + " := " + genTAC(node.childrens[0]) + " " + node.type + " " + genTAC(node.childrens[1]))
-        return tempVar
-    elif ( node.type == "PRINT"):
-        print( "PRINT " + genTAC(node.childrens[0]))
-    elif ( node.type == "IF" ):
-        tempVar = "t" + str(varCounter)
-        varCounter = varCounter +1
-        print ( tempVar + " := !" + str(node.childrens[0].val))
-        tempLabel = "l" + str(labelCounter)
-        labelCounter = labelCounter + 1
-        print ( "gotoLabelIf " + tempVar + " " + tempLabel)
-        genTAC(node.childrens[1])
-        print ( tempLabel)
-    else:
-        for child in node.childrens:
-            genTAC(child)
+
+# varCounter = 0
+# labelCounter = 0
+# def genTAC(node):
+#     global varCounter
+#     global labelCounter
+#     if ( node.type == "ASIGN" ):
+#         print(node.childrens[0].val  + " := " + genTAC(node.childrens[1]) )
+#     elif ( node.type == "INUMBER"):
+#         return str(node.val)
+#     elif ( node.type in ["+", "-", "*", "/", "^"] ):
+#         tempVar = "t" + str(varCounter)
+#         varCounter = varCounter +1
+#         print( tempVar + " := " + genTAC(node.childrens[0]) + " " + node.type + " " + genTAC(node.childrens[1]))
+#         return tempVar
+#     elif ( node.type == "PRINT"):
+#         print( "PRINT " + genTAC(node.childrens[0]))
+#     elif ( node.type == "IF" ):
+#         tempVar = "t" + str(varCounter)
+#         varCounter = varCounter +1
+#         print ( tempVar + " := !" + str(node.childrens[0].val))
+#         tempLabel = "l" + str(labelCounter)
+#         labelCounter = labelCounter + 1
+#         print ( "gotoLabelIf " + tempVar + " " + tempLabel)
+#         genTAC(node.childrens[1])
+#         print ( tempLabel)
+#     else:
+#         for child in node.childrens:
+#             genTAC(child)
     
 
-print ("\ntac:\n")
-genTAC(abstractTree)
+# print ("\ntac:\n")
+# genTAC(abstractTree)
 
 
 #Some examples
