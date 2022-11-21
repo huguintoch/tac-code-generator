@@ -1,3 +1,5 @@
+import ply.yacc as yacc
+import ply.lex as lex
 import sys
 sys.path.insert(0, "..")
 
@@ -23,12 +25,12 @@ literals = ['=', '+', '-', '*', '/', '^', ';', '(', ')', '{', '}']
 
 # Tokens
 
+
 def t_NAME(t):
     r'[a-zA-Z_]+[a-zA-Z0-9]*'
     if t.value in reserved:
         t.type = reserved[t.value]
     return t
-
 
 
 def t_FNUMBER(t):
@@ -42,6 +44,7 @@ def t_INUMBER(t):
     t.value = int(t.value)
     return t
 
+
 t_EQUALS = r'=='
 t_NOTEQUALS = r'!='
 t_LESS = r'<'
@@ -51,24 +54,25 @@ t_GREATEREQUALS = r'>='
 
 t_ignore = " \t"
 
+
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += t.value.count("\n")
+
 
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
 
+
 # Build the lexer
-import ply.lex as lex
 lexer = lex.lex()
 
 # Parsing rules
 
 
-
 class Node:
-    
+
     # childrens = None
     # type = None
 
@@ -77,18 +81,18 @@ class Node:
         self.type = ''
         self.val = ''
 
-    def print(self, lvl = 0):
+    def print(self, lvl=0):
         r = (' ' * lvl) + self.type + ":" + str(self.val)
         print(r)
-        #print(self.childrens)
+        # print(self.childrens)
         for c in self.childrens:
             c.print(lvl+1)
-        
+
 
 # dictionary of names
 symbolsTable = {
-    "table" : {},
-    "parent" : None,
+    "table": {},
+    "parent": None,
 }
 abstractTree = None
 
@@ -100,40 +104,45 @@ def p_prog(p):
     abstractTree.type = 'root'
     abstractTree.childrens.extend(p[1])
 
+
 def p_statements_recursion(p):
     '''stmts : statement stmts
              | statement '''
     stmt = p[1]
     if len(p) == 3:
-        stmts = [ stmt ]
+        stmts = [stmt]
         stmts.extend(p[2])
         p[0] = stmts
-    else: 
-        p[0] = [ stmt ]
-    
+    else:
+        p[0] = [stmt]
+
+
 def p_dcl_declare_int(p):
     'statement : INTDCL NAME ";"'
-    symbolsTable["table"][p[2]] = { "type": "INT", "value":0}
+    symbolsTable["table"][p[2]] = {"type": "INT", "value": 0}
     n = Node()
     n.type = "INT_DCL"
     n.val = p[2]
     p[0] = n
 
+
 def p_statement_declare_float(p):
     'statement : FLOATDCL NAME ";"'
-    symbolsTable["table"][p[2]] = { "type": "FLOAT", "value":0 }
+    symbolsTable["table"][p[2]] = {"type": "FLOAT", "value": 0}
     n = Node()
     n.type = "FLOAT_DCL"
     n.val = p[2]
     p[0] = n
 
+
 def p_statement_declare_bool(p):
     'statement : BOOLDCL NAME ";"'
-    symbolsTable["table"][p[2]] = { "type": "BOOLEAN", "value": False }
+    symbolsTable["table"][p[2]] = {"type": "BOOLEAN", "value": False}
     n = Node()
     n.type = "BOOL_DCL"
     n.val = p[2]
     p[0] = n
+
 
 def p_statement_print(p):
     'statement : PRINT expression ";"'
@@ -141,6 +150,7 @@ def p_statement_print(p):
     n.type = 'PRINT'
     n.childrens.append(p[2])
     p[0] = n
+
 
 def p_statement_if(p):
     'statement : IF "(" boolexp ")" "{" stmts "}"'
@@ -152,10 +162,11 @@ def p_statement_if(p):
     n.childrens.append(n2)
     p[0] = n
 
+
 def p_statement_assign(p):
     'statement : NAME "=" expression ";"'
     if p[1] not in symbolsTable["table"]:
-        print ( "You must declare a variable before using it")
+        print("You must declare a variable before using it")
     n = Node()
     n.type = 'ASIGN'
     if p[1] in symbolsTable["table"]:
@@ -163,16 +174,16 @@ def p_statement_assign(p):
         n1.type = 'ID'
         n1.val = p[1]
         n.childrens.append(n1)
-    else: 
+    else:
         print("Error undeclared variable")
-
-
     n.childrens.append(p[3])
     p[0] = n
+
 
 def p_expression_group(p):
     "expression : '(' expression ')'"
     p[0] = p[2]
+
 
 def p_expression_binop(p):
     '''numexp : numexp '+' numexp
@@ -186,10 +197,12 @@ def p_expression_binop(p):
         n.childrens.append(p[1])
         n.childrens.append(p[3])
         p[0] = n
-    
+
+
 def p_expression_number(p):
     '''expression : numexp'''
     p[0] = p[1]
+
 
 def p_expression_inumber(p):
     "numexp : INUMBER"
@@ -197,7 +210,6 @@ def p_expression_inumber(p):
     n.type = 'INUMBER'
     n.val = int(p[1])
     p[0] = n
-
 
 
 def p_expression_fnumber(p):
@@ -211,6 +223,7 @@ def p_expression_fnumber(p):
 def p_expression_boolval(p):
     "expression : boolexp"
     p[0] = p[1]
+
 
 def p_bool_expression(p):
     '''boolexp : '(' boolexp ')'
@@ -234,6 +247,7 @@ def p_bool_expression(p):
         else:
             p[0] = p[2]
 
+
 def p_comparison_expression(p):
     '''compexp : boolexp EQUALS boolexp
                | boolexp NOTEQUALS boolexp
@@ -249,6 +263,7 @@ def p_comparison_expression(p):
     n.childrens.append(p[3])
     p[0] = n
 
+
 def p_expression_name(p):
     "expression : NAME"
     if p[1] in symbolsTable["table"]:
@@ -258,14 +273,13 @@ def p_expression_name(p):
         p[0] = n
 
 
-
 def p_error(p):
     if p:
         print("Syntax error at '%s'" % p.value)
     else:
         print("Syntax error at EOF")
 
-import ply.yacc as yacc
+
 parser = yacc.yacc()
 
 
@@ -304,13 +318,13 @@ abstractTree.print()
 #     else:
 #         for child in node.childrens:
 #             genTAC(child)
-    
+
 
 # print ("\ntac:\n")
 # genTAC(abstractTree)
 
 
-#Some examples
+# Some examples
 # for ( i = 0; i < 3; i++){
 #     stamentes
 # }
@@ -322,7 +336,6 @@ abstractTree.print()
 # staments
 # i = i + 1
 # Label1
-
 
 
 # while ( condicion ) {
