@@ -264,14 +264,16 @@ def p_bool_expression(p):
     '''boolexp : '(' boolexp ')'
                | boolexp AND boolexp
                | boolexp OR boolexp
-               | compexp
                | BOOLVAL
-               | NAME '''
+               | compexp'''
     if len(p) == 2:
-        n = Node()
-        n.type = 'BOOLVAL'
-        n.val = (p[1] == 'true')
-        p[0] = n
+        if p[1] in ('true', 'false'):
+            n = Node()
+            n.type = 'BOOLVAL'
+            n.val = p[1]
+            p[0] = n
+        else:
+            p[0] = p[1]
     else:
         if p[2] in ('and', 'or'):
             n = Node()
