@@ -72,19 +72,14 @@ lexer = lex.lex()
 
 
 class Node:
-
-    # childrens = None
-    # type = None
-
     def __init__(self):
         self.childrens = []
         self.type = ''
         self.val = ''
 
     def print(self, lvl=0):
-        r = (' ' * lvl) + self.type + ":" + str(self.val)
+        r = (' ' * lvl) + self.type + " : " + str(self.val)
         print(r)
-        # print(self.childrens)
         for c in self.childrens:
             c.print(lvl+1)
 
@@ -101,7 +96,7 @@ def p_prog(p):
     'prog : stmts'
     global abstractTree
     abstractTree = Node()
-    abstractTree.type = 'root'
+    abstractTree.type = 'ROOT'
     abstractTree.childrens.extend(p[1])
 
 
@@ -123,16 +118,16 @@ def p_dcl_declare_int(p):
     if len(p) == 4:
         symbolsTable["table"][p[2]] = {"type": "INT", "value": 0}
         n = Node()
-        n.type = "INT_DCL"
+        n.type = "INTDCL"
         n.val = p[2]
         p[0] = n
     else:
         symbolsTable["table"][p[2]] = {"type": "INT", "value": p[4]}
         n = Node()
-        n.type = "INT_DCL"
+        n.type = "INTDCL"
         n.val = p[2]
         n2 = Node()
-        n2.type = "ASIGN"
+        n2.type = "ASSIGN"
         n2.childrens.append(n)
         n2.childrens.append(p[4])
         p[0] = n2
@@ -143,16 +138,16 @@ def p_statement_declare_float(p):
     if len(p) == 4:
         symbolsTable["table"][p[2]] = {"type": "FLOAT", "value": 0.0}
         n = Node()
-        n.type = "FLOAT_DCL"
+        n.type = "FLOATDCL"
         n.val = p[2]
         p[0] = n
     else:
         symbolsTable["table"][p[2]] = {"type": "FLOAT", "value": p[4]}
         n = Node()
-        n.type = "FLOAT_DCL"
+        n.type = "FLOATDCL"
         n.val = p[2]
         n2 = Node()
-        n2.type = "ASIGN"
+        n2.type = "ASSIGN"
         n2.childrens.append(n)
         n2.childrens.append(p[4])
         p[0] = n2
@@ -164,16 +159,16 @@ def p_statement_declare_bool(p):
     if len(p) == 4:
         symbolsTable["table"][p[2]] = {"type": "BOOL", "value": False}
         n = Node()
-        n.type = "BOOL_DCL"
+        n.type = "BOOLDCL"
         n.val = p[2]
         p[0] = n
     else:
         symbolsTable["table"][p[2]] = {"type": "BOOL", "value": p[4]}
         n = Node()
-        n.type = "BOOL_DCL"
+        n.type = "BOOLDCL"
         n.val = p[2]
         n2 = Node()
-        n2.type = "ASIGN"
+        n2.type = "ASSIGN"
         n2.childrens.append(n)
         n2.childrens.append(p[4])
         p[0] = n2
@@ -203,7 +198,7 @@ def p_statement_assign(p):
     if p[1] not in symbolsTable["table"]:
         print("You must declare a variable before using it")
     n = Node()
-    n.type = 'ASIGN'
+    n.type = 'ASSIGN'
     if p[1] in symbolsTable["table"]:
         n1 = Node()
         n1.type = 'ID'
@@ -332,7 +327,7 @@ abstractTree.print()
 # def genTAC(node):
 #     global varCounter
 #     global labelCounter
-#     if ( node.type == "ASIGN" ):
+#     if ( node.type == "ASSIGN" ):
 #         print(node.childrens[0].val  + " := " + genTAC(node.childrens[1]) )
 #     elif ( node.type == "INUMBER"):
 #         return str(node.val)
