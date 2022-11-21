@@ -1,0 +1,8 @@
+int a = 0;
+int b;
+a = 1;
+b = 2 ^ 3;
+if (a == b) {
+    int c;
+    c = 4;
+}

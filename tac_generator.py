@@ -118,30 +118,65 @@ def p_statements_recursion(p):
 
 
 def p_dcl_declare_int(p):
-    'statement : INTDCL NAME ";"'
-    symbolsTable["table"][p[2]] = {"type": "INT", "value": 0}
-    n = Node()
-    n.type = "INT_DCL"
-    n.val = p[2]
-    p[0] = n
-
+    '''statement : INTDCL NAME ";"
+                 | INTDCL NAME "=" numexp ";"'''
+    if len(p) == 4:
+        symbolsTable["table"][p[2]] = {"type": "INT", "value": 0}
+        n = Node()
+        n.type = "INT_DCL"
+        n.val = p[2]
+        p[0] = n
+    else:
+        symbolsTable["table"][p[2]] = {"type": "INT", "value": p[4]}
+        n = Node()
+        n.type = "INT_DCL"
+        n.val = p[2]
+        n2 = Node()
+        n2.type = "ASIGN"
+        n2.childrens.append(n)
+        n2.childrens.append(p[4])
+        p[0] = n2
 
 def p_statement_declare_float(p):
-    'statement : FLOATDCL NAME ";"'
-    symbolsTable["table"][p[2]] = {"type": "FLOAT", "value": 0}
-    n = Node()
-    n.type = "FLOAT_DCL"
-    n.val = p[2]
-    p[0] = n
+    '''statement : FLOATDCL NAME ";"
+                 | FLOATDCL NAME "=" numexp ";"'''
+    if len(p) == 4:
+        symbolsTable["table"][p[2]] = {"type": "FLOAT", "value": 0.0}
+        n = Node()
+        n.type = "FLOAT_DCL"
+        n.val = p[2]
+        p[0] = n
+    else:
+        symbolsTable["table"][p[2]] = {"type": "FLOAT", "value": p[4]}
+        n = Node()
+        n.type = "FLOAT_DCL"
+        n.val = p[2]
+        n2 = Node()
+        n2.type = "ASIGN"
+        n2.childrens.append(n)
+        n2.childrens.append(p[4])
+        p[0] = n2
 
 
 def p_statement_declare_bool(p):
-    'statement : BOOLDCL NAME ";"'
-    symbolsTable["table"][p[2]] = {"type": "BOOLEAN", "value": False}
-    n = Node()
-    n.type = "BOOL_DCL"
-    n.val = p[2]
-    p[0] = n
+    '''statement : BOOLDCL NAME ";"
+                 | BOOLDCL NAME "=" boolexp ";"'''
+    if len(p) == 4:
+        symbolsTable["table"][p[2]] = {"type": "BOOL", "value": False}
+        n = Node()
+        n.type = "BOOL_DCL"
+        n.val = p[2]
+        p[0] = n
+    else:
+        symbolsTable["table"][p[2]] = {"type": "BOOL", "value": p[4]}
+        n = Node()
+        n.type = "BOOL_DCL"
+        n.val = p[2]
+        n2 = Node()
+        n2.type = "ASIGN"
+        n2.childrens.append(n)
+        n2.childrens.append(p[4])
+        p[0] = n2
 
 
 def p_statement_print(p):
