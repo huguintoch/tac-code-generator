@@ -216,11 +216,11 @@ def p_expression_group(p):
 
 
 def p_expression_binop(p):
-    '''numexp : numexp '+' numexp
-              | numexp '-' numexp
-              | numexp '*' numexp
-              | numexp '/' numexp
-              | numexp '^' numexp'''
+    '''binopexp : numexp '+' numexp
+                | numexp '-' numexp
+                | numexp '*' numexp
+                | numexp '/' numexp
+                | numexp '^' numexp'''
     if p[2] in ('+', '-', '*', '/', '^'):
         n = Node()
         n.type = p[2]
@@ -228,6 +228,18 @@ def p_expression_binop(p):
         n.childrens.append(p[3])
         p[0] = n
 
+def p_expression_numexp(p):
+    '''numexp : binopexp
+              | NAME'''
+    if type(p[1]) is Node:
+        p[0] = p[1]
+    elif p[1] in symbolsTable["table"]:
+        n = Node()
+        n.type = 'ID'
+        n.val = p[1]
+        p[0] = n
+    else:
+        print("Error undeclared variable {}".format(p[1]))
 
 def p_expression_number(p):
     '''expression : numexp'''
@@ -260,11 +272,17 @@ def p_bool_expression(p):
                | boolexp AND boolexp
                | boolexp OR boolexp
                | BOOLVAL
+               | NAME
                | compexp'''
     if len(p) == 2:
         if p[1] in ('true', 'false'):
             n = Node()
             n.type = 'BOOLVAL'
+            n.val = p[1]
+            p[0] = n
+        elif p[1] in symbolsTable["table"]:
+            n = Node()
+            n.type = 'ID'
             n.val = p[1]
             p[0] = n
         else:
