@@ -559,6 +559,10 @@ def genTAC(node):
         for child in node.childrens:
             genTAC(child)
 
-
-print("\nTAC:\n")
+# Output TAC to file
+outputFilename = sys.argv[1]
+print("\n\n*TAC output to " + outputFilename)
+f = open(outputFilename, "w")
+sys.stdout = f
 genTAC(abstractTree)
+f.close()
