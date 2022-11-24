@@ -10,11 +10,12 @@ reserved = {
     "boolean": "BOOLDCL",
     "true": "BOOLVAL",
     "false": "BOOLVAL",
+    "and": "AND",
+    "or": "OR",
     "if": "IF",
     "elif": "ELIF",
     "else": "ELSE",
-    "and": "AND",
-    "or": "OR"
+    "while": "WHILE",
 }
 
 
@@ -249,6 +250,16 @@ def p_statement_else(p):
     n.childrens.append(n2)
     p[0] = [n]
 
+
+def p_statement_while(p):
+    'statement : WHILE "(" boolexp ")" "{" stmts "}"'
+    n = Node()
+    n.type = 'WHILE'
+    n.childrens.append(p[3])
+    n2 = Node()
+    n2.childrens.extend(p[6])
+    n.childrens.append(n2)
+    p[0] = n
 
 def p_statement_assign(p):
     'statement : NAME "=" expression ";"'
