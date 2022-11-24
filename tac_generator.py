@@ -197,7 +197,6 @@ def p_statement_if(p):
                  | IF "(" boolexp ")" "{" stmts "}" elifstmt
                  | IF "(" boolexp ")" "{" stmts "}" elifstmt elsestmt
                  | IF "(" boolexp ")" "{" stmts "}" elsestmt'''
-    print("@if")
     if len(p) == 10:
         n = Node()
         n.type = 'IF'
