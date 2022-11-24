@@ -365,9 +365,12 @@ def p_expression_binop(p):
 
 
 def p_expression_numexp(p):
-    '''numexp : binopexp
+    '''numexp : "(" numexp ")"
+              | binopexp
               | NAME'''
-    if type(p[1]) is Node:
+    if len(p) == 4:
+        p[0] = p[2]
+    elif type(p[1]) is Node:
         p[0] = p[1]
     elif p[1] in symbolsTable["table"]:
         n = Node()
