@@ -11,6 +11,8 @@ reserved = {
     "true": "BOOLVAL",
     "false": "BOOLVAL",
     "if": "IF",
+    "elif": "ELIF",
+    "else": "ELSE",
     "and": "AND",
     "or": "OR"
 }
@@ -78,7 +80,7 @@ class Node:
         self.val = ''
 
     def print(self, lvl=0):
-        r = (' ' * lvl) + self.type + " : " + str(self.val)
+        r = ('-' * lvl) + self.type + " : " + str(self.val)
         print(r)
         for c in self.childrens:
             c.print(lvl+1)
@@ -132,6 +134,7 @@ def p_dcl_declare_int(p):
         n2.childrens.append(p[4])
         p[0] = n2
 
+
 def p_statement_declare_float(p):
     '''statement : FLOATDCL NAME ";"
                  | FLOATDCL NAME "=" numexp ";"'''
@@ -183,14 +186,68 @@ def p_statement_print(p):
 
 
 def p_statement_if(p):
-    'statement : IF "(" boolexp ")" "{" stmts "}"'
+    '''statement : IF "(" boolexp ")" "{" stmts "}"
+                 | IF "(" boolexp ")" "{" stmts "}" elifstmt
+                 | IF "(" boolexp ")" "{" stmts "}" elifstmt elsestmt
+                 | IF "(" boolexp ")" "{" stmts "}" elsestmt'''
+    if len(p) == 10:
+        n = Node()
+        n.type = 'IF'
+        n.childrens.append(p[3])
+        n2 = Node()
+        n2.childrens.extend(p[6])
+        n.childrens.append(n2)
+        n.childrens.extend(p[8])
+        n.childrens.extend(p[9])
+        p[0] = n
+    elif len(p) == 9:
+        n = Node()
+        n.type = 'IF'
+        n.childrens.append(p[3])
+        n2 = Node()
+        n2.childrens.extend(p[6])
+        n.childrens.append(n2)
+        n.childrens.extend(p[8])
+        p[0] = n
+    else:
+        n = Node()
+        n.type = 'IF'
+        n.childrens.append(p[3])
+        n2 = Node()
+        n2.childrens.extend(p[6])
+        n.childrens.append(n2)
+        p[0] = n
+
+
+def p_statement_elif(p):
+    '''elifstmt : ELIF "(" boolexp ")" "{" stmts "}"
+                | ELIF "(" boolexp ")" "{" stmts "}" elifstmt'''
+    if len(p) == 9:
+        n = Node()
+        n.type = 'ELIF'
+        n.childrens.append(p[3])
+        n2 = Node()
+        n2.childrens.extend(p[6])
+        n.childrens.append(n2)
+        p[0] = [n] + p[8]
+    else:
+        n = Node()
+        n.type = 'ELIF'
+        n.childrens.append(p[3])
+        n2 = Node()
+        n2.childrens.extend(p[6])
+        n.childrens.append(n2)
+        p[0] = [n]
+
+
+def p_statement_else(p):
+    'elsestmt : ELSE "{" stmts "}"'
     n = Node()
-    n.type = 'IF'
+    n.type = 'ELSE'
     n2 = Node()
-    n2.childrens = p[6]
-    n.childrens.append(p[3])
+    n2.childrens.extend(p[3])
     n.childrens.append(n2)
-    p[0] = n
+    p[0] = [n]
 
 
 def p_statement_assign(p):
@@ -228,6 +285,7 @@ def p_expression_binop(p):
         n.childrens.append(p[3])
         p[0] = n
 
+
 def p_expression_numexp(p):
     '''numexp : binopexp
               | NAME'''
@@ -240,6 +298,7 @@ def p_expression_numexp(p):
         p[0] = n
     else:
         print("Error undeclared variable {}".format(p[1]))
+
 
 def p_expression_number(p):
     '''expression : numexp'''
