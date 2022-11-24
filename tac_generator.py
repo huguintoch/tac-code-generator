@@ -273,6 +273,7 @@ def p_statement_while(p):
     n.childrens.append(n2)
     p[0] = n
 
+
 def p_statement_for_loop_stmt(p):
     '''loopstmt : NAME "+" "+"
                 | NAME "-" "-"
@@ -284,7 +285,7 @@ def p_statement_for_loop_stmt(p):
     n2 = Node()
     n2.type = 'ID'
     n2.val = p[1]
-    n.childrens.append(n2)        
+    n.childrens.append(n2)
     n3 = Node()
     if p[2] == "=":
         n.childrens.append(p[3])
@@ -473,65 +474,89 @@ f = open("code.txt")
 content = f.read()
 yacc.parse(content)
 
-
 abstractTree.print()
 
-# varCounter = 0
-# labelCounter = 0
-# def genTAC(node):
-#     global varCounter
-#     global labelCounter
-#     if ( node.type == "ASSIGN" ):
-#         print(node.childrens[0].val  + " := " + genTAC(node.childrens[1]) )
-#     elif ( node.type == "INUMBER"):
-#         return str(node.val)
-#     elif ( node.type in ["+", "-", "*", "/", "^"] ):
-#         tempVar = "t" + str(varCounter)
-#         varCounter = varCounter +1
-#         print( tempVar + " := " + genTAC(node.childrens[0]) + " " + node.type + " " + genTAC(node.childrens[1]))
-#         return tempVar
-#     elif ( node.type == "PRINT"):
-#         print( "PRINT " + genTAC(node.childrens[0]))
-#     elif ( node.type == "IF" ):
-#         tempVar = "t" + str(varCounter)
-#         varCounter = varCounter +1
-#         print ( tempVar + " := !" + str(node.childrens[0].val))
-#         tempLabel = "l" + str(labelCounter)
-#         labelCounter = labelCounter + 1
-#         print ( "gotoLabelIf " + tempVar + " " + tempLabel)
-#         genTAC(node.childrens[1])
-#         print ( tempLabel)
-#     else:
-#         for child in node.childrens:
-#             genTAC(child)
+varCounter = 0
+labelCounter = 0
 
 
-# print ("\ntac:\n")
-# genTAC(abstractTree)
+def genTAC(node):
+    global varCounter
+    global labelCounter
+    if (node.type == "ASSIGN"):
+        print(node.childrens[0].val + " := " + genTAC(node.childrens[1]))
+    elif (node.type in ["ID", "INUMBER", "FNUMBER", "BOOLVAL"]):
+        return str(node.val)
+    elif (node.type in ["+", "-", "*", "/", "^"]):
+        tempVar = "TEMP_" + str(varCounter)
+        varCounter = varCounter + 1
+        print(tempVar + " := " +
+              genTAC(node.childrens[0]) + " " + node.type + " " + genTAC(node.childrens[1]))
+        return tempVar
+    elif (node.type in ["==", "!=", ">", "<", ">=", "<=", "AND", "OR"]):
+        tempVar = "TEMP_" + str(varCounter)
+        varCounter = varCounter + 1
+        print(tempVar + " := " +
+              genTAC(node.childrens[0]) + " " + node.type + " " + genTAC(node.childrens[1]))
+        return tempVar
+    elif (node.type == "PRINT"):
+        print("PRINT " + genTAC(node.childrens[0]))
+    elif (node.type == "IF"):
+        tempVar = "TEMP_" + str(varCounter)
+        varCounter = varCounter + 1
+        print(tempVar + " := !" + genTAC(node.childrens[0]))
+        tempLabel = "LABEL_" + str(labelCounter)
+        labelCounter = labelCounter + 1
+        print("gotoLabelIf " + tempVar + " " + tempLabel)
+        genTAC(node.childrens[1])
+        print(tempLabel)
+        for child in node.childrens[2:]:
+            genTAC(child)
+    elif (node.type == "ELIF"):
+        tempVar = "TEMP_" + str(varCounter)
+        varCounter = varCounter + 1
+        print(tempVar + " := !" + genTAC(node.childrens[0]))
+        tempLabel = "LABEL_" + str(labelCounter)
+        labelCounter = labelCounter + 1
+        print("gotoLabelIf " + tempVar + " " + tempLabel)
+        genTAC(node.childrens[1])
+        print(tempLabel)
+        for child in node.childrens[2:]:
+            genTAC(child)
+    elif (node.type == "ELSE"):
+        genTAC(node.childrens[0])
+    elif (node.type == "WHILE"):
+        tempLabel = "LABEL_" + str(labelCounter)
+        labelCounter = labelCounter + 1
+        print(tempLabel)
+        tempVar = "TEMP_" + str(varCounter)
+        varCounter = varCounter + 1
+        print(tempVar + " := !" + genTAC(node.childrens[0]))
+        tempLabel2 = "LABEL_" + str(labelCounter)
+        labelCounter = labelCounter + 1
+        print("gotoLabelIf " + tempVar + " " + tempLabel2)
+        genTAC(node.childrens[1])
+        print("gotoLabelIf " + "true " + tempLabel)
+        print(tempLabel2)
+    elif (node.type == "FOR"):
+        genTAC(node.childrens[0])
+        tempLabel = "LABEL_" + str(labelCounter)
+        labelCounter = labelCounter + 1
+        print(tempLabel)
+        tempVar = "TEMP_" + str(varCounter)
+        varCounter = varCounter + 1
+        print(tempVar + " := !" + genTAC(node.childrens[1]))
+        tempLabel2 = "LABEL_" + str(labelCounter)
+        labelCounter = labelCounter + 1
+        print("gotoLabelIf " + tempVar + " " + tempLabel2)
+        genTAC(node.childrens[3])
+        genTAC(node.childrens[2])
+        print("gotoLabelIf " + "true " + tempLabel)
+        print(tempLabel2)
+    else:
+        for child in node.childrens:
+            genTAC(child)
 
 
-# Some examples
-# for ( i = 0; i < 3; i++){
-#     stamentes
-# }
-# i := 0
-# t1 = i < 3
-# t0 = !t1
-# gotoLabelif t0 Label1
-
-# staments
-# i = i + 1
-# Label1
-
-
-# while ( condicion ) {
-#     staments
-# }
-# WHILE
-# t1 = condicion
-# t0 = !t1
-# gotoLabelif t0 Label1
-
-# staments
-
-# Label1
+print("\nTAC:\n")
+genTAC(abstractTree)
