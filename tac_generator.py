@@ -16,6 +16,7 @@ reserved = {
     "elif": "ELIF",
     "else": "ELSE",
     "while": "WHILE",
+    "for": "FOR",
 }
 
 
@@ -116,7 +117,7 @@ def p_statements_recursion(p):
 
 
 def p_dcl_declare_int(p):
-    '''statement : INTDCL NAME ";"
+    '''numdcl : INTDCL NAME ";"
                  | INTDCL NAME "=" numexp ";"'''
     if len(p) == 4:
         symbolsTable["table"][p[2]] = {"type": "INT", "value": 0}
@@ -137,7 +138,7 @@ def p_dcl_declare_int(p):
 
 
 def p_statement_declare_float(p):
-    '''statement : FLOATDCL NAME ";"
+    '''numdcl : FLOATDCL NAME ";"
                  | FLOATDCL NAME "=" numexp ";"'''
     if len(p) == 4:
         symbolsTable["table"][p[2]] = {"type": "FLOAT", "value": 0.0}
@@ -155,6 +156,11 @@ def p_statement_declare_float(p):
         n2.childrens.append(n)
         n2.childrens.append(p[4])
         p[0] = n2
+
+
+def p_statement_num_dcl(p):
+    'statement : numdcl'
+    p[0] = p[1]
 
 
 def p_statement_declare_bool(p):
@@ -196,6 +202,7 @@ def p_statement_if(p):
         n.type = 'IF'
         n.childrens.append(p[3])
         n2 = Node()
+        n2.type = 'BLOCK'
         n2.childrens.extend(p[6])
         n.childrens.append(n2)
         n.childrens.extend(p[8])
@@ -206,6 +213,7 @@ def p_statement_if(p):
         n.type = 'IF'
         n.childrens.append(p[3])
         n2 = Node()
+        n2.type = 'BLOCK'
         n2.childrens.extend(p[6])
         n.childrens.append(n2)
         n.childrens.extend(p[8])
@@ -228,6 +236,7 @@ def p_statement_elif(p):
         n.type = 'ELIF'
         n.childrens.append(p[3])
         n2 = Node()
+        n2.type = 'BLOCK'
         n2.childrens.extend(p[6])
         n.childrens.append(n2)
         p[0] = [n] + p[8]
@@ -236,6 +245,7 @@ def p_statement_elif(p):
         n.type = 'ELIF'
         n.childrens.append(p[3])
         n2 = Node()
+        n2.type = 'BLOCK'
         n2.childrens.extend(p[6])
         n.childrens.append(n2)
         p[0] = [n]
@@ -246,6 +256,7 @@ def p_statement_else(p):
     n = Node()
     n.type = 'ELSE'
     n2 = Node()
+    n2.type = 'BLOCK'
     n2.childrens.extend(p[3])
     n.childrens.append(n2)
     p[0] = [n]
@@ -257,9 +268,64 @@ def p_statement_while(p):
     n.type = 'WHILE'
     n.childrens.append(p[3])
     n2 = Node()
+    n2.type = 'BLOCK'
     n2.childrens.extend(p[6])
     n.childrens.append(n2)
     p[0] = n
+
+def p_statement_for_loop_stmt(p):
+    '''loopstmt : NAME "+" "+"
+                | NAME "-" "-"
+                | NAME "+" "=" numexp
+                | NAME "-" "=" numexp
+                | NAME "=" numexp'''
+    n = Node()
+    n.type = 'ASSIGN'
+    n2 = Node()
+    n2.type = 'ID'
+    n2.val = p[1]
+    n.childrens.append(n2)        
+    n3 = Node()
+    if p[2] == "=":
+        n.childrens.append(p[3])
+    elif p[2] == "+":
+        n3.type = '+'
+        n3.childrens.append(n2)
+        if p[3] == "+":
+            n4 = Node()
+            n4.type = 'INUMBER'
+            n4.val = 1
+            n3.childrens.append(n4)
+        else:
+            n3.childrens.append(p[4])
+        n.childrens.append(n3)
+    elif p[2] == "-":
+        n3.type = '-'
+        n3.childrens.append(n2)
+        if p[3] == "-":
+            n4 = Node()
+            n4.type = 'INUMBER'
+            n4.val = 1
+            n3.childrens.append(n4)
+        else:
+            n3.childrens.append(p[4])
+        n.childrens.append(n3)
+    p[0] = n
+
+
+def p_statement_for(p):
+    'statement : FOR "(" numdcl boolexp ";" loopstmt ")" "{" stmts "}"'
+    n = Node()
+    n.type = 'FOR'
+    n.childrens.append(p[3])
+    n.childrens.append(p[4])
+    n.childrens.append(p[6])
+    n2 = Node()
+    n2.type = 'BLOCK'
+    n2.childrens.extend(p[9])
+    n.childrens.append(n2)
+    p[0] = n
+
 
 def p_statement_assign(p):
     'statement : NAME "=" expression ";"'
