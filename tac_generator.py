@@ -365,8 +365,7 @@ def p_expression_binop(p):
 
 
 def p_expression_numexp(p):
-    '''numexp : "(" numexp ")"
-              | binopexp
+    '''numexp : binopexp
               | NAME'''
     if len(p) == 4:
         p[0] = p[2]
@@ -408,8 +407,7 @@ def p_expression_boolval(p):
 
 
 def p_bool_expression(p):
-    '''boolexp : '(' boolexp ')'
-               | boolexp AND boolexp
+    '''boolexp : boolexp AND boolexp
                | boolexp OR boolexp
                | BOOLVAL
                | NAME
