@@ -185,10 +185,10 @@ def p_statement_declare_bool(p):
 
 
 def p_statement_print(p):
-    'statement : PRINT expression ";"'
+    'statement : PRINT "(" expression ")" ";"'
     n = Node()
     n.type = 'PRINT'
-    n.childrens.append(p[2])
+    n.childrens.append(p[3])
     p[0] = n
 
 
@@ -197,6 +197,7 @@ def p_statement_if(p):
                  | IF "(" boolexp ")" "{" stmts "}" elifstmt
                  | IF "(" boolexp ")" "{" stmts "}" elifstmt elsestmt
                  | IF "(" boolexp ")" "{" stmts "}" elsestmt'''
+    print("@if")
     if len(p) == 10:
         n = Node()
         n.type = 'IF'
@@ -345,9 +346,10 @@ def p_statement_assign(p):
     p[0] = n
 
 
-def p_expression_group(p):
-    "expression : '(' expression ')'"
-    p[0] = p[2]
+# def p_expression_group(p):
+#     "expression : '(' expression ')'"
+#     print('@expression_group')
+#     p[0] = p[2]
 
 
 def p_expression_binop(p):
