@@ -343,27 +343,23 @@ def p_statement_assign(p):
     p[0] = n
 
 
+def p_expression_binoperand(p):
+    '''binoperand : numexp
+                   | NAME'''
+    if p[1] in symbolsTable["table"]:
+        n = Node()
+        n.type = 'ID'
+        n.val = p[1]
+        p[0] = n
+    else:
+        p[0] = p[1]
+
 def p_expression_binop(p):
-    '''binopexp : numexp '+' numexp
-                | numexp '-' numexp
-                | numexp '*' numexp
-                | numexp '/' numexp
-                | numexp '^' numexp
-                | NAME '+' numexp
-                | NAME '-' numexp
-                | NAME '*' numexp
-                | NAME '/' numexp
-                | NAME '^' numexp
-                | numexp '+' NAME
-                | numexp '-' NAME
-                | numexp '*' NAME
-                | numexp '/' NAME
-                | numexp '^' NAME
-                | NAME '+' NAME
-                | NAME '-' NAME
-                | NAME '*' NAME
-                | NAME '/' NAME
-                | NAME '^' NAME'''
+    '''binopexp : binoperand "+" binoperand
+                | binoperand "-" binoperand
+                | binoperand "*" binoperand
+                | binoperand "/" binoperand
+                | binoperand "^" binoperand'''
     if p[2] in ('+', '-', '*', '/', '^'):
         n = Node()
         n.type = p[2]
@@ -441,14 +437,12 @@ def p_logical_operation(p):
 
 
 def p_comparison_expression(p):
-    '''compexp : boolexp EQUALS boolexp
-               | boolexp NOTEQUALS boolexp
-               | numexp EQUALS numexp
-               | numexp NOTEQUALS numexp
-               | numexp GREATER numexp
-               | numexp LESS numexp
-               | numexp LESSEQUALS numexp
-               | numexp GREATEREQUALS numexp'''
+    '''compexp : expression EQUALS expression
+               | expression NOTEQUALS expression
+               | expression GREATER expression
+               | expression LESS expression
+               | expression LESSEQUALS expression
+               | expression GREATEREQUALS expression'''
     n = Node()
     n.type = p[2]
     n.childrens.append(p[1])
