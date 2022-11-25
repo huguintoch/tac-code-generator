@@ -330,8 +330,6 @@ def p_statement_for(p):
 
 def p_statement_assign(p):
     'statement : NAME "=" expression ";"'
-    if p[1] not in symbolsTable["table"]:
-        print("You must declare a variable before using it")
     n = Node()
     n.type = 'ASSIGN'
     if p[1] in symbolsTable["table"]:
@@ -345,18 +343,27 @@ def p_statement_assign(p):
     p[0] = n
 
 
-# def p_expression_group(p):
-#     "expression : '(' expression ')'"
-#     print('@expression_group')
-#     p[0] = p[2]
-
-
 def p_expression_binop(p):
     '''binopexp : numexp '+' numexp
                 | numexp '-' numexp
                 | numexp '*' numexp
                 | numexp '/' numexp
-                | numexp '^' numexp'''
+                | numexp '^' numexp
+                | NAME '+' numexp
+                | NAME '-' numexp
+                | NAME '*' numexp
+                | NAME '/' numexp
+                | NAME '^' numexp
+                | numexp '+' NAME
+                | numexp '-' NAME
+                | numexp '*' NAME
+                | numexp '/' NAME
+                | numexp '^' NAME
+                | NAME '+' NAME
+                | NAME '-' NAME
+                | NAME '*' NAME
+                | NAME '/' NAME
+                | NAME '^' NAME'''
     if p[2] in ('+', '-', '*', '/', '^'):
         n = Node()
         n.type = p[2]
@@ -367,18 +374,11 @@ def p_expression_binop(p):
 
 def p_expression_numexp(p):
     '''numexp : binopexp
-              | NAME'''
-    if len(p) == 4:
-        p[0] = p[2]
-    elif type(p[1]) is Node:
+              | "(" numexp ")"'''
+    if len(p) == 2:
         p[0] = p[1]
-    elif p[1] in symbolsTable["table"]:
-        n = Node()
-        n.type = 'ID'
-        n.val = p[1]
-        p[0] = n
     else:
-        print("Error undeclared variable {}".format(p[1]))
+        p[0] = p[2]
 
 
 def p_expression_number(p):
@@ -408,33 +408,36 @@ def p_expression_boolval(p):
 
 
 def p_bool_expression(p):
-    '''boolexp : boolexp AND boolexp
-               | boolexp OR boolexp
-               | BOOLVAL
+    '''boolexp : BOOLVAL
                | NAME
-               | compexp'''
-    if len(p) == 2:
-        if p[1] in ('true', 'false'):
-            n = Node()
-            n.type = 'BOOLVAL'
-            n.val = p[1]
-            p[0] = n
-        elif p[1] in symbolsTable["table"]:
-            n = Node()
-            n.type = 'ID'
-            n.val = p[1]
-            p[0] = n
-        else:
-            p[0] = p[1]
+               | compexp
+               | logicalop
+               | "(" boolexp ")"'''
+    if len(p) == 4:
+        p[0] = p[2]
+    elif p[1] in ('true', 'false'):
+        n = Node()
+        n.type = 'BOOLVAL'
+        n.val = p[1]
+        p[0] = n
+    elif p[1] in symbolsTable["table"]:
+        n = Node()
+        n.type = 'ID'
+        n.val = p[1]
+        p[0] = n
     else:
-        if p[2] in ('and', 'or'):
-            n = Node()
-            n.type = p[2].upper()
-            n.childrens.append(p[1])
-            n.childrens.append(p[3])
-            p[0] = n
-        else:
-            p[0] = p[2]
+        p[0] = p[1]
+
+
+def p_logical_operation(p):
+    '''logicalop : boolexp AND boolexp
+                 | boolexp OR boolexp'''
+    if p[2] in ('and', 'or'):
+        n = Node()
+        n.type = p[2].upper()
+        n.childrens.append(p[1])
+        n.childrens.append(p[3])
+        p[0] = n
 
 
 def p_comparison_expression(p):
@@ -558,6 +561,7 @@ def genTAC(node):
     else:
         for child in node.childrens:
             genTAC(child)
+
 
 # Output TAC to file
 outputFilename = sys.argv[1]
