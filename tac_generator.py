@@ -81,6 +81,33 @@ class Node:
         self.type = ''
         self.val = ''
 
+    def type_check(self, symbolsTable):
+        for child in self.childrens:
+            child.type_check(symbolsTable)
+
+        # Verify numeric-type operations
+        if self.type in ['+', '-', '*', '/', '^', '<', '>', '<=', '>=']:
+            for child in self.childrens:
+                if child.type in ['BOOLVAL', 'AND', 'OR']:                
+                    print("ERROR: Invalid type for operation '%s'" % self.type + " on " + child.type)
+                    exit(1)
+                elif child.type == 'ID':
+                    if symbolsTable[child.val]['type'] == 'BOOL':
+                        print("ERROR: Invalid type for operation '%s'" % self.type)
+                        exit(1)
+        if self.type in ['==', '!=']:
+            if self.childrens[0].type == 'BOOLVAL' and self.childrens[1].type == 'BOOLVAL':
+                pass
+            elif self.childrens[0].type == 'ID' and self.childrens[1].type == 'ID':
+                if symbolsTable[self.childrens[0].val]['type'] == 'BOOL' and symbolsTable[self.childrens[1].val]['type'] == 'BOOL':
+                    pass
+                else:
+                    print("ERROR: Invalid type for operation '%s'" % self.type)
+                    exit(1)
+            else:
+                print("ERROR: Invalid type for operation '%s'" % self.type)
+                exit(1)
+
     def print(self, lvl=0):
         r = ('-' * lvl) + self.type + " : " + str(self.val)
         print(r)
@@ -474,6 +501,7 @@ f = open("code.txt")
 content = f.read()
 yacc.parse(content)
 
+abstractTree.type_check(symbolsTable["table"])
 abstractTree.print()
 
 varCounter = 0
