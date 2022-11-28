@@ -107,6 +107,15 @@ class Node:
                       self.type + " on " + childOneType + " and " + childTwoType)
                 exit(1)
 
+        # Verify scope of variables
+        if self.type == 'BLOCK':
+            for child in self.childrens:
+                if child.type == 'ID':
+                    if child.val not in symbolsTable:
+                        print("ERROR: Variable '%s'" % child.val +
+                              " is not defined in the scope")
+                        exit(1)
+
     def print(self, lvl=0):
         r = ('-' * lvl) + self.type + " : " + str(self.val)
         print(r)
