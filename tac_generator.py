@@ -82,30 +82,29 @@ class Node:
         self.val = ''
 
     def type_check(self, symbolsTable):
+        def is_bool_type(exp):
+            return exp in ['BOOLVAL', 'AND', 'OR', 'BOOL']
+
         for child in self.childrens:
             child.type_check(symbolsTable)
 
         # Verify numeric-type operations
         if self.type in ['+', '-', '*', '/', '^', '<', '>', '<=', '>=']:
             for child in self.childrens:
-                if child.type in ['BOOLVAL', 'AND', 'OR']:                
-                    print("ERROR: Invalid type for operation '%s'" % self.type + " on " + child.type)
+                childType = symbolsTable[child.val]['type'] if child.type == 'ID' else child.type
+                if is_bool_type(child.type):
+                    print("ERROR: Invalid type for operation '%s'" %
+                          self.type + " on " + child.type)
                     exit(1)
-                elif child.type == 'ID':
-                    if symbolsTable[child.val]['type'] == 'BOOL':
-                        print("ERROR: Invalid type for operation '%s'" % self.type)
-                        exit(1)
+        # Verify numeric and boolean-type operations
         if self.type in ['==', '!=']:
-            if self.childrens[0].type == 'BOOLVAL' and self.childrens[1].type == 'BOOLVAL':
-                pass
-            elif self.childrens[0].type == 'ID' and self.childrens[1].type == 'ID':
-                if symbolsTable[self.childrens[0].val]['type'] == 'BOOL' and symbolsTable[self.childrens[1].val]['type'] == 'BOOL':
-                    pass
-                else:
-                    print("ERROR: Invalid type for operation '%s'" % self.type)
-                    exit(1)
-            else:
-                print("ERROR: Invalid type for operation '%s'" % self.type)
+            childOneType = symbolsTable[self.childrens[0]
+                                        .val]['type'] if self.childrens[0].type == 'ID' else self.childrens[0].type
+            childTwoType = symbolsTable[self.childrens[1]
+                                        .val]['type'] if self.childrens[1].type == 'ID' else self.childrens[1].type
+            if is_bool_type(childOneType) != is_bool_type(childTwoType):
+                print("ERROR: Invalid type for operation '%s'" %
+                      self.type + " on " + childOneType + " and " + childTwoType)
                 exit(1)
 
     def print(self, lvl=0):
