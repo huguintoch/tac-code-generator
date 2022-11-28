@@ -478,12 +478,21 @@ abstractTree.print()
 varCounter = 0
 labelCounter = 0
 
+def getDefaultValue(type):
+    if type == 'INTDCL':
+        return 0
+    elif type == 'FLOATDCL':
+        return 0.0
+    elif type == 'BOOLDCL':
+        return False
 
 def genTAC(node):
     global varCounter
     global labelCounter
     if (node.type == "ASSIGN"):
         print(node.childrens[0].val + " := " + genTAC(node.childrens[1]))
+    elif (node.type in ["INTDCL", "FLOATDCL"]):
+        print(node.val + " := " + str(getDefaultValue(node.type)))
     elif (node.type in ["ID", "INUMBER", "FNUMBER", "BOOLVAL"]):
         return str(node.val)
     elif (node.type in ["+", "-", "*", "/", "^"]):
