@@ -505,7 +505,7 @@ def p_error(p):
 parser = yacc.yacc()
 
 
-f = open("code.txt")
+f = open("input.txt")
 content = f.read()
 yacc.parse(content)
 
