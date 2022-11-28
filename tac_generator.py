@@ -502,13 +502,15 @@ def p_error(p):
         print("Syntax error at EOF")
 
 
-parser = yacc.yacc()
-
-
+# Open input file
 f = open("input.txt")
 content = f.read()
+
+# Build the parser
+parser = yacc.yacc()
 yacc.parse(content)
 
+# Print the AST
 abstractTree.type_check(symbolsTable["table"])
 abstractTree.print()
 

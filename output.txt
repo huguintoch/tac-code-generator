@@ -1,0 +1,57 @@
+a := 0
+b := 0.0
+testBool := false
+a := 1
+TEMP_0 := 2 ^ 3
+b := TEMP_0
+TEMP_5 := 0 / a
+TEMP_4 := 2 - TEMP_5
+TEMP_3 := TEMP_4 > 2
+TEMP_6 := true OR testBool
+TEMP_2 := TEMP_3 AND TEMP_6
+TEMP_1 := !TEMP_2
+gotoLabelIf TEMP_1 LABEL_0
+c := 0
+c := 4
+gotoLabelIf true LABEL_ENDIF
+LABEL_0
+TEMP_7 := !testBool
+gotoLabelIf TEMP_7 LABEL_1
+d := 0
+d := 4
+gotoLabelIf true LABEL_ENDIF
+LABEL_1
+TEMP_8 := !false
+gotoLabelIf TEMP_8 LABEL_2
+x := false
+gotoLabelIf true LABEL_ENDIF
+LABEL_2
+e := 5.5
+LABEL_ENDIF
+LABEL_3
+TEMP_11 := 2 + 1
+TEMP_10 := a < TEMP_11
+TEMP_9 := !TEMP_10
+gotoLabelIf TEMP_9 LABEL_4
+y := true
+TEMP_12 := !y
+gotoLabelIf TEMP_12 LABEL_5
+TEMP_13 := a + 1
+a := TEMP_13
+gotoLabelIf true LABEL_ENDIF
+LABEL_5
+LABEL_ENDIF
+gotoLabelIf true LABEL_3
+LABEL_4
+i := 0
+LABEL_5
+TEMP_15 := i <= 10
+TEMP_14 := !TEMP_15
+gotoLabelIf TEMP_14 LABEL_6
+TEMP_16 := a - 1
+a := TEMP_16
+PRINT a
+TEMP_17 := i + 1
+i := TEMP_17
+gotoLabelIf true LABEL_5
+LABEL_6
