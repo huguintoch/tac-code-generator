@@ -130,6 +130,10 @@ symbolsTable = {
 }
 abstractTree = None
 
+####################
+# PROGRAM
+####################
+
 
 def p_prog(p):
     'prog : stmts'
@@ -150,10 +154,34 @@ def p_statements_recursion(p):
     else:
         p[0] = [stmt]
 
+####################
+# STATEMENTS
+####################
 
-def p_dcl_declare_int(p):
+
+def p_statement_assign(p):
+    'statement : NAME "=" expression ";"'
+    n = Node()
+    n.type = 'ASSIGN'
+    if p[1] in symbolsTable["table"]:
+        n1 = Node()
+        n1.type = 'ID'
+        n1.val = p[1]
+        n.childrens.append(n1)
+    else:
+        print("Error undeclared variable")
+    n.childrens.append(p[3])
+    p[0] = n
+
+
+def p_statement_num_dcl(p):
+    'statement : numdcl'
+    p[0] = p[1]
+
+
+def p_dcl_int(p):
     '''numdcl : INTDCL NAME ";"
-                 | INTDCL NAME "=" numexp ";"'''
+              | INTDCL NAME "=" numexp ";"'''
     if len(p) == 4:
         symbolsTable["table"][p[2]] = {"type": "INT", "value": 0}
         n = Node()
@@ -172,9 +200,9 @@ def p_dcl_declare_int(p):
         p[0] = n2
 
 
-def p_statement_declare_float(p):
+def p_dcl_float(p):
     '''numdcl : FLOATDCL NAME ";"
-                 | FLOATDCL NAME "=" numexp ";"'''
+              | FLOATDCL NAME "=" numexp ";"'''
     if len(p) == 4:
         symbolsTable["table"][p[2]] = {"type": "FLOAT", "value": 0.0}
         n = Node()
@@ -191,11 +219,6 @@ def p_statement_declare_float(p):
         n2.childrens.append(n)
         n2.childrens.append(p[4])
         p[0] = n2
-
-
-def p_statement_num_dcl(p):
-    'statement : numdcl'
-    p[0] = p[1]
 
 
 def p_statement_declare_bool(p):
@@ -363,75 +386,18 @@ def p_statement_for(p):
     p[0] = n
 
 
-def p_statement_assign(p):
-    'statement : NAME "=" expression ";"'
-    n = Node()
-    n.type = 'ASSIGN'
-    if p[1] in symbolsTable["table"]:
-        n1 = Node()
-        n1.type = 'ID'
-        n1.val = p[1]
-        n.childrens.append(n1)
-    else:
-        print("Error undeclared variable")
-    n.childrens.append(p[3])
-    p[0] = n
+####################
+# EXPRESSIONS
+####################
 
 
-def p_expression_binoperand(p):
-    '''binoperand : numexp
-                   | NAME'''
+def p_expression_name(p):
+    "expression : NAME"
     if p[1] in symbolsTable["table"]:
         n = Node()
         n.type = 'ID'
         n.val = p[1]
         p[0] = n
-    else:
-        p[0] = p[1]
-
-
-def p_expression_binop(p):
-    '''binopexp : binoperand "+" binoperand
-                | binoperand "-" binoperand
-                | binoperand "*" binoperand
-                | binoperand "/" binoperand
-                | binoperand "^" binoperand'''
-    if p[2] in ('+', '-', '*', '/', '^'):
-        n = Node()
-        n.type = p[2]
-        n.childrens.append(p[1])
-        n.childrens.append(p[3])
-        p[0] = n
-
-
-def p_expression_numexp(p):
-    '''numexp : binopexp
-              | "(" numexp ")"'''
-    if len(p) == 2:
-        p[0] = p[1]
-    else:
-        p[0] = p[2]
-
-
-def p_expression_number(p):
-    '''expression : numexp'''
-    p[0] = p[1]
-
-
-def p_expression_inumber(p):
-    "numexp : INUMBER"
-    n = Node()
-    n.type = 'INUMBER'
-    n.val = int(p[1])
-    p[0] = n
-
-
-def p_expression_fnumber(p):
-    "numexp : FNUMBER"
-    n = Node()
-    n.type = 'FNUMBER'
-    n.val = float(p[1])
-    p[0] = n
 
 
 def p_expression_boolval(p):
@@ -486,13 +452,60 @@ def p_comparison_expression(p):
     p[0] = n
 
 
-def p_expression_name(p):
-    "expression : NAME"
+def p_expression_number(p):
+    '''expression : numexp'''
+    p[0] = p[1]
+
+
+def p_expression_inumber(p):
+    "numexp : INUMBER"
+    n = Node()
+    n.type = 'INUMBER'
+    n.val = int(p[1])
+    p[0] = n
+
+
+def p_expression_fnumber(p):
+    "numexp : FNUMBER"
+    n = Node()
+    n.type = 'FNUMBER'
+    n.val = float(p[1])
+    p[0] = n
+
+
+def p_expression_numexp(p):
+    '''numexp : binopexp
+              | "(" numexp ")"'''
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = p[2]
+
+
+def p_expression_binop(p):
+    '''binopexp : binoperand "+" binoperand
+                | binoperand "-" binoperand
+                | binoperand "*" binoperand
+                | binoperand "/" binoperand
+                | binoperand "^" binoperand'''
+    if p[2] in ('+', '-', '*', '/', '^'):
+        n = Node()
+        n.type = p[2]
+        n.childrens.append(p[1])
+        n.childrens.append(p[3])
+        p[0] = n
+
+
+def p_expression_binoperand(p):
+    '''binoperand : numexp
+                   | NAME'''
     if p[1] in symbolsTable["table"]:
         n = Node()
         n.type = 'ID'
         n.val = p[1]
         p[0] = n
+    else:
+        p[0] = p[1]
 
 
 def p_error(p):
