@@ -1,8 +1,24 @@
 int a = 0;
-int b;
+float b;
+boolean testBool = false;
 a = 1;
 b = 2 ^ 3;
-if (a == b) {
+if ((2 - 3 + 2.3 / a) >= 2 and true or testBool) {
     int c;
     c = 4;
+} elif (testBool) {
+    int d;
+    d = 4;
+} elif (false) {
+    boolean x = false;
+} elif (true) {
+    boolean y = false;
+} else {
+    float e = 5.5;
+}
+while (a >= 0+1) {
+    a = a + 1;
+}
+for (int i = 0; i <= 10; i += 2) {
+    a = a + 1;
 }
