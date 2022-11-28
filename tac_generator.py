@@ -354,6 +354,7 @@ def p_expression_binoperand(p):
     else:
         p[0] = p[1]
 
+
 def p_expression_binop(p):
     '''binopexp : binoperand "+" binoperand
                 | binoperand "-" binoperand
@@ -478,6 +479,7 @@ abstractTree.print()
 varCounter = 0
 labelCounter = 0
 
+
 def getDefaultValue(type):
     if type == 'INTDCL':
         return 0
@@ -485,6 +487,7 @@ def getDefaultValue(type):
         return 0.0
     elif type == 'BOOLDCL':
         return False
+
 
 def genTAC(node):
     global varCounter
@@ -514,24 +517,29 @@ def genTAC(node):
         varCounter = varCounter + 1
         print(tempVar + " := !" + genTAC(node.childrens[0]))
         tempLabel = "LABEL_" + str(labelCounter)
-        labelCounter = labelCounter + 1
         print("gotoLabelIf " + tempVar + " " + tempLabel)
         genTAC(node.childrens[1])
-        print(tempLabel)
+        print("gotoLabelIf true LABEL_ENDIF")
         for child in node.childrens[2:]:
             genTAC(child)
+        if node.childrens[-1].type != "ELSE":
+            print("LABEL_" + str(labelCounter))
+        print("LABEL_ENDIF")
     elif (node.type == "ELIF"):
+        print("LABEL_" + str(labelCounter))
+        labelCounter = labelCounter + 1
         tempVar = "TEMP_" + str(varCounter)
         varCounter = varCounter + 1
         print(tempVar + " := !" + genTAC(node.childrens[0]))
         tempLabel = "LABEL_" + str(labelCounter)
-        labelCounter = labelCounter + 1
         print("gotoLabelIf " + tempVar + " " + tempLabel)
         genTAC(node.childrens[1])
-        print(tempLabel)
+        print("gotoLabelIf true LABEL_ENDIF")
         for child in node.childrens[2:]:
             genTAC(child)
     elif (node.type == "ELSE"):
+        print("LABEL_" + str(labelCounter))
+        labelCounter = labelCounter + 1
         genTAC(node.childrens[0])
     elif (node.type == "WHILE"):
         tempLabel = "LABEL_" + str(labelCounter)
